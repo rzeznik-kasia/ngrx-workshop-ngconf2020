@@ -1,10 +1,13 @@
 import { Component, OnInit } from "@angular/core";
+import { Store } from '@ngrx/store';
 import {
   BookModel,
   calculateBooksGrossEarnings,
   BookRequiredProps
 } from "src/app/shared/models";
 import { BooksService } from "src/app/shared/services";
+import { State } from 'src/app/shared/state';
+import { BooksPageActions } from '../../actions';
 
 @Component({
   selector: "app-books",
@@ -16,9 +19,14 @@ export class BooksPageComponent implements OnInit {
   currentBook: BookModel | null = null;
   total: number = 0;
 
-  constructor(private booksService: BooksService) {}
+  constructor(
+    private booksService: BooksService,
+    private store: Store,
+  ) {}
+
 
   ngOnInit() {
+    this.store.dispatch(BooksPageActions.enterBookPage());
     this.getBooks();
     this.removeSelectedBook();
   }
@@ -35,10 +43,12 @@ export class BooksPageComponent implements OnInit {
   }
 
   onSelect(book: BookModel) {
+    this.store.dispatch(BooksPageActions.selectBook({ bookId: book.id }));
     this.currentBook = book;
   }
 
   onCancel() {
+    this.store.dispatch(BooksPageActions.clearSelectedBook());
     this.removeSelectedBook();
   }
 
@@ -55,6 +65,8 @@ export class BooksPageComponent implements OnInit {
   }
 
   saveBook(bookProps: BookRequiredProps) {
+    this.store.dispatch(BooksPageActions.createBook({ book: bookProps }));
+
     this.booksService.create(bookProps).subscribe(() => {
       this.getBooks();
       this.removeSelectedBook();
@@ -62,6 +74,8 @@ export class BooksPageComponent implements OnInit {
   }
 
   updateBook(book: BookModel) {
+    this.store.dispatch(BooksPageActions.updateBook({ bookId: book.id, changes: book }));
+
     this.booksService.update(book.id, book).subscribe(() => {
       this.getBooks();
       this.removeSelectedBook();
@@ -69,6 +83,8 @@ export class BooksPageComponent implements OnInit {
   }
 
   onDelete(book: BookModel) {
+    this.store.dispatch(BooksPageActions.deleteBook({ bookId: book.id }));
+
     this.booksService.delete(book.id).subscribe(() => {
       this.getBooks();
       this.removeSelectedBook();
