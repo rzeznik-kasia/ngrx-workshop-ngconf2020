@@ -1,12 +1,19 @@
 import { Component, OnInit } from "@angular/core";
 import { Store } from '@ngrx/store';
+import { Observable } from "rxjs";
+import {
+  State,
+  selectAllBooks,
+  selectActiveBook,
+  selectBooksEarningsTotals,
+} from "src/app/shared/state";
+
 import {
   BookModel,
   calculateBooksGrossEarnings,
   BookRequiredProps
 } from "src/app/shared/models";
 import { BooksService } from "src/app/shared/services";
-import { State } from 'src/app/shared/state';
 import { BooksPageActions, BooksApiActions } from '../../actions';
 
 @Component({
@@ -15,9 +22,9 @@ import { BooksPageActions, BooksApiActions } from '../../actions';
   styleUrls: ["./books-page.component.css"]
 })
 export class BooksPageComponent implements OnInit {
-  books: BookModel[] = [];
-  currentBook: BookModel | null = null;
-  total: number = 0;
+  books$ = this.store.select(selectAllBooks);
+  currentBook$ = this.store.select(selectActiveBook);
+  total$ = this.store.select(selectBooksEarningsTotals);
 
   constructor(
     private booksService: BooksService,
@@ -28,34 +35,24 @@ export class BooksPageComponent implements OnInit {
   ngOnInit() {
     this.store.dispatch(BooksPageActions.enterBookPage());
     this.getBooks();
-    this.removeSelectedBook();
   }
 
   getBooks() {
     this.booksService.all().subscribe(books => {
-      this.books = books;
-      this.updateTotals(books);
-
       this.store.dispatch(BooksApiActions.booksLoaded({ books }));
     });
   }
 
-  updateTotals(books: BookModel[]) {
-    this.total = calculateBooksGrossEarnings(books);
-  }
-
   onSelect(book: BookModel) {
     this.store.dispatch(BooksPageActions.selectBook({ bookId: book.id }));
-    this.currentBook = book;
   }
 
   onCancel() {
-    this.store.dispatch(BooksPageActions.clearSelectedBook());
     this.removeSelectedBook();
   }
 
   removeSelectedBook() {
-    this.currentBook = null;
+    this.store.dispatch(BooksPageActions.clearSelectedBook());
   }
 
   onSave(book: BookRequiredProps | BookModel) {
@@ -81,9 +78,6 @@ export class BooksPageComponent implements OnInit {
     this.store.dispatch(BooksPageActions.updateBook({ bookId: book.id, changes: book }));
 
     this.booksService.update(book.id, book).subscribe((book) => {
-      this.getBooks();
-      this.removeSelectedBook();
-
       this.store.dispatch(BooksApiActions.bookUpdated({ book }));
     });
   }
