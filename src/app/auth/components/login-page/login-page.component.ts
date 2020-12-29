@@ -4,7 +4,7 @@ import { Store } from "@ngrx/store";
 import { UserModel } from "src/app/shared/models";
 import { AuthUserActions } from "../../actions";
 import { LoginEvent } from "../login-form";
-import { State } from 'src/app/shared/state';
+import { selectAuthError, selectAuthUser, selectGettingAuthStatus, State } from 'src/app/shared/state';
 
 @Component({
   selector: "app-login-page",
@@ -12,12 +12,9 @@ import { State } from 'src/app/shared/state';
   styleUrls: ["./login-page.component.css"]
 })
 export class LoginPageComponent {
-  gettingStatus$: Observable<boolean> = of(false);
-  user$: Observable<UserModel | null> = of({
-    id: "1",
-    username: "NgRx Learner"
-  });
-  error$: Observable<string | null> = of(null);
+  gettingStatus$: Observable<boolean> = this.store.select(selectGettingAuthStatus);
+  user$: Observable<UserModel | null> = this.store.select(selectAuthUser);
+  error$: Observable<string | null> = this.store.select(selectAuthError);
 
   constructor(private store: Store<State>) {}
 
