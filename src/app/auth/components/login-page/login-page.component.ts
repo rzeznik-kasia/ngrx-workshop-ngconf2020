@@ -4,6 +4,7 @@ import { Store } from "@ngrx/store";
 import { UserModel } from "src/app/shared/models";
 import { AuthUserActions } from "../../actions";
 import { LoginEvent } from "../login-form";
+import { State } from 'src/app/shared/state';
 
 @Component({
   selector: "app-login-page",
@@ -18,7 +19,11 @@ export class LoginPageComponent {
   });
   error$: Observable<string | null> = of(null);
 
+  constructor(private store: Store<State>) {}
+
   onLogin($event: LoginEvent) {
-    // Not Implemented
+    this.store.dispatch(
+      AuthUserActions.login($event.username, $event.password)
+    );
   }
 }
