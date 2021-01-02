@@ -31,6 +31,30 @@ export const authReducer = createReducer(
             error: null
         };
     }),
+
+    on(AuthApiActions.getAuthStatusSuccess, (state, action) => {
+        return {
+            gettingStatus: false,
+            user: action.user, 
+            error: null,
+        };
+    }),
+
+    on(AuthApiActions.loginSuccess, (state, action) => {
+        return {
+            gettingStatus: false,
+            user: action.user, 
+            error: null
+        };
+    }),
+
+    on(AuthApiActions.loginFailure, (state, action) => {
+        return {
+            gettingStatus: false,
+            user: null, 
+            error: action.reason,
+        };
+    }),
 );
 
 export function reducer(state: State | undefined, action: Action) {
